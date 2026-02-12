@@ -123,10 +123,10 @@ flowchart LR
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pip install -e .
-# Optional (only if you need Airflow extras):
-# pip install -e .[airflow]
+# Optional (only if you need to run Airflow locally):
+# pip install -r requirements-airflow.txt
 bash scripts/run_local.sh  # uses --source sample for local demo
+bash scripts/run_local.sh
 ```
 
 > For CDP, package `src/` as a deployable artifact and submit via Airflow, Oozie, or Spark submit wrappers.
@@ -146,29 +146,16 @@ If you are on Windows PowerShell, use:
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-pip install -e .
+$env:PYTHONPATH = "src"
 python -m pipeline.job --config conf/pipeline.yml --source sample
 ```
 
-Airflow is optional. Install extras from the package metadata:
+Airflow is optional. Use `requirements-airflow.txt`, which selects a compatible Airflow version based on your Python version (2.9.3 for `<3.13`, 3.1.7 for `>=3.13,<3.14`).
 
 ```powershell
-pip install -e .[airflow]
+pip install -r requirements-airflow.txt
 ```
 
-
-
-### Common Windows errors
-
-- `ModuleNotFoundError: No module named pipeline`
-  - Run `pip install -e .` once in your active virtual environment, then retry `python -m pipeline.job ...`.
-- `IndentationError` / `SyntaxError` in `src/pipeline/*.py`
-  - This usually indicates a stale or locally edited file that differs from the repository.
-  - Re-sync your branch (`git pull`) and verify syntax with:
-
-```powershell
-python -m compileall src
-```
 
 ### Troubleshooting install errors
 

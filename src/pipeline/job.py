@@ -8,6 +8,7 @@ from pyspark.sql import SparkSession
 
 from pipeline.config import load_config
 from pipeline.ingestion import ingest_from_jdbc, ingest_sample_orders
+from pipeline.ingestion import ingest_from_jdbc
 from pipeline.load import write_partitioned_parquet
 from pipeline.quality import run_quality_checks
 from pipeline.transformation import build_daily_sales, transform_orders
@@ -20,6 +21,7 @@ def build_spark(app_name: str) -> SparkSession:
 
 
 def run(config_path: str, source: str = "jdbc") -> None:
+def run(config_path: str) -> None:
     """Execute end-to-end ETL run."""
 
     cfg = load_config(config_path)
@@ -53,6 +55,25 @@ def run(config_path: str, source: str = "jdbc") -> None:
         write_partitioned_parquet(daily_sales, cfg.paths["gold_daily_sales"], "order_date")
     finally:
         spark.stop()
+    raw_orders = ingest_from_jdbc(spark, cfg.jdbc)
+    silver_orders = transform_orders(raw_orders)
+
+    quality_result = run_quality_checks(
+        silver_orders,
+        required_columns=cfg.quality["required_columns"],
+        primary_key=cfg.quality["primary_key"],
+        amount_min=cfg.quality.get("amount_min", 0),
+    )
+
+    if not quality_result.passed:
+        raise ValueError(f"Quality checks failed: {quality_result.metrics}")
+
+    daily_sales = build_daily_sales(silver_orders)
+
+    write_partitioned_parquet(silver_orders, cfg.paths["silver_orders"], "order_date")
+    write_partitioned_parquet(daily_sales, cfg.paths["gold_daily_sales"], "order_date")
+
+    spark.stop()
 
 
 if __name__ == "__main__":
@@ -67,3 +88,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     run(args.config, args.source)
+    args = parser.parse_args()
+
+    run(args.config)
