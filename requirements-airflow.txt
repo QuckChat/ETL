@@ -1,0 +1,7 @@
+# Optional orchestration dependency.
+# Airflow is not required to run the local ETL sample.
+# Python compatibility:
+# - 2.9.x supports Python <3.13
+# - 3.1.x supports Python >=3.10,<3.14
+apache-airflow==2.9.3; python_version < '3.13'
+apache-airflow==3.1.7; python_version >= '3.13' and python_version < '3.14'
