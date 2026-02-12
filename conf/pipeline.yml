@@ -1,0 +1,24 @@
+app_name: cdp_orders_etl
+batch_date: "2026-01-01"
+
+paths:
+  bronze_orders: /data/bronze/orders
+  bronze_customers: /data/bronze/customers
+  silver_orders: /data/silver/orders
+  gold_daily_sales: /data/gold/daily_sales
+  quarantine_orders: /data/quarantine/orders
+
+jdbc:
+  url: jdbc:postgresql://db-host:5432/commerce
+  table: public.orders
+  fetchsize: 10000
+
+quality:
+  primary_key: order_id
+  amount_min: 0
+  min_rows: 1
+  required_columns:
+    - order_id
+    - customer_id
+    - order_ts
+    - amount
