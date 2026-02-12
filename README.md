@@ -123,38 +123,10 @@ flowchart LR
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-# Optional (only if you need to run Airflow locally):
-# pip install -r requirements-airflow.txt
-bash scripts/run_local.sh  # uses --source sample for local demo
+bash scripts/run_local.sh
 ```
 
 > For CDP, package `src/` as a deployable artifact and submit via Airflow, Oozie, or Spark submit wrappers.
-
-### Local validation
-
-```bash
-PYTHONPATH=src pytest -q tests/test_quality_rules.py
-```
-
-
-### Windows notes
-
-If you are on Windows PowerShell, use:
-
-```powershell
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-$env:PYTHONPATH = "src"
-python -m pipeline.job --config conf/pipeline.yml --source sample
-```
-
-`apache-airflow==2.9.3` is optional and is only installable on Python `<3.13`.
-Install it only when needed:
-
-```powershell
-pip install -r requirements-airflow.txt
-```
 
 ---
 
