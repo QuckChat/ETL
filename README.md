@@ -22,26 +22,26 @@ Build a maintainable ETL pipeline that ingests customer order data from multiple
 
 ```mermaid
 flowchart LR
-  A[Relational DB\n(PostgreSQL/MySQL)] --> I[Ingestion Layer\nPySpark JDBC]
-  B[Partner REST API] --> I2[Ingestion Layer\nAPI -> Bronze]
-  C[CSV/JSON Files on HDFS/S3] --> I3[Ingestion Layer\nSpark Reader]
+  A["Relational DB<br>(PostgreSQL/MySQL)"] --> I["Ingestion Layer<br>PySpark JDBC"]
+  B["Partner REST API"] --> I2["Ingestion Layer<br>API -> Bronze"]
+  C["CSV/JSON Files on HDFS/S3"] --> I3["Ingestion Layer<br>Spark Reader"]
 
-  I --> BR[(Bronze Zone\nRaw Tables)]
+  I --> BR["(Bronze Zone<br>Raw Tables)"]
   I2 --> BR
   I3 --> BR
 
-  BR --> T[Transform Layer\nCleanse, Join, Business Rules]
-  T --> DQ[Data Quality Layer\nNull, Dup, Range, Freshness]
-  DQ -->|pass| SI[(Silver Zone\nConformed Data)]
-  DQ -->|fail| Q[(Quarantine/Error Tables)]
+  BR --> T["Transform Layer<br>Cleanse, Join, Business Rules"]
+  T --> DQ["Data Quality Layer<br>Null, Dup, Range, Freshness"]
+  DQ -->|pass| SI["(Silver Zone<br>Conformed Data)"]
+  DQ -->|fail| Q["(Quarantine/Error Tables)"]
 
-  SI --> G[Aggregation Layer\nKPIs + Dimensions]
-  G --> GO[(Gold Zone\nAnalytics Marts)]
+  SI --> G["Aggregation Layer<br>KPIs + Dimensions"]
+  G --> GO["(Gold Zone<br>Analytics Marts)"]
 
-  GO --> H[Hive/Impala BI Access]
-  GO --> APP[Full-Stack API/Backend]
+  GO --> H["Hive/Impala BI Access"]
+  GO --> APP["Full-Stack API/Backend"]
 
-  O[Airflow/Oozie Scheduler] --> I
+  O["Airflow/Oozie Scheduler"] --> I
   O --> T
   O --> DQ
   O --> G
