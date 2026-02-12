@@ -126,6 +126,7 @@ pip install -r requirements.txt
 # Optional (only if you need to run Airflow locally):
 # pip install -r requirements-airflow.txt
 bash scripts/run_local.sh  # uses --source sample for local demo
+bash scripts/run_local.sh
 ```
 
 > For CDP, package `src/` as a deployable artifact and submit via Airflow, Oozie, or Spark submit wrappers.
