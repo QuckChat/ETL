@@ -17,41 +17,19 @@ CHECK_FILES = [
 ]
 
 
-def _run(cmd: list[str]) -> tuple[int, str, str]:
+def _run(cmd: list[str]) -> int:
     result = subprocess.run(cmd, capture_output=True, text=True)
-    return result.returncode, result.stdout.strip(), result.stderr.strip()
-
-
-def _print_output(stdout: str, stderr: str) -> None:
-    if stdout:
-        print(stdout)
-    if stderr:
-        print(stderr)
-
-
-def _git_show_to_file(path: Path) -> bool:
-    code, stdout, stderr = _run(["git", "show", f"HEAD:{path.as_posix()}"])
-    if code != 0:
-        _print_output(stdout, stderr)
-        return False
-
-    # Write exact HEAD content to disk to avoid editor/merge leftovers.
-    path.write_text(stdout + ("\n" if not stdout.endswith("\n") else ""), encoding="utf-8")
-    return True
+    if result.stdout:
+        print(result.stdout.strip())
+    if result.stderr:
+        print(result.stderr.strip())
+    return result.returncode
 
 
 def restore_files() -> int:
-    print("Attempting auto-restore from git (git restore)...")
-    code, stdout, stderr = _run(["git", "restore", "--source=HEAD", "--worktree", "--", *[str(path) for path in CHECK_FILES]])
-    _print_output(stdout, stderr)
-
-    print("Attempting hard content reset from HEAD (git show -> file write)...")
-    ok = True
-    for file_path in CHECK_FILES:
-        if not _git_show_to_file(file_path):
-            ok = False
-
-    return 0 if code == 0 and ok else 1
+    cmd = ["git", "checkout", "--", *[str(path) for path in CHECK_FILES]]
+    print("Attempting auto-restore from git...")
+    return _run(cmd)
 
 
 def syntax_ok() -> bool:
@@ -81,16 +59,17 @@ def main() -> int:
         return 0
 
     print("\nSuggested fixes:")
-    print("1) Re-sync code: git pull --ff-only")
-    print("2) Close editors/terminals locking files and re-run doctor with --fix")
-    print("3) Manual restore if needed:")
-    print("   git restore --source=HEAD --worktree -- src/pipeline/*.py")
+    print("1) Re-sync code: git pull")
+    print("2) Restore corrupted files:")
+    print("   git checkout -- src/pipeline/*.py")
+    print("3) Re-run this doctor script.")
 
     if not args.fix:
         return 1
 
     if restore_files() != 0:
-        print("Auto-restore had issues. Please run the manual restore command above.")
+        print("Auto-restore failed. Please run the restore command manually.")
+        return 1
 
     print("\nRe-running syntax checks after auto-restore...")
     if syntax_ok():
