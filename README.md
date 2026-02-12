@@ -123,10 +123,10 @@ flowchart LR
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-pip install -e .
-# Optional (only if you need Airflow extras):
-# pip install -e .[airflow]
+# Optional (only if you need to run Airflow locally):
+# pip install -r requirements-airflow.txt
 bash scripts/run_local.sh  # uses --source sample for local demo
+bash scripts/run_local.sh
 ```
 
 > For CDP, package `src/` as a deployable artifact and submit via Airflow, Oozie, or Spark submit wrappers.
@@ -146,34 +146,16 @@ If you are on Windows PowerShell, use:
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-pip install -e .
-python scripts/doctor.py --fix
+$env:PYTHONPATH = "src"
 python -m pipeline.job --config conf/pipeline.yml --source sample
-# or one command:
-# .\scripts\run_local.ps1
 ```
 
-Airflow is optional. Install extras from the package metadata:
+Airflow is optional. Use `requirements-airflow.txt`, which selects a compatible Airflow version based on your Python version (2.9.3 for `<3.13`, 3.1.7 for `>=3.13,<3.14`).
 
 ```powershell
-pip install -e .[airflow]
+pip install -r requirements-airflow.txt
 ```
 
-
-
-### Common Windows errors
-
-- Traceback at `src/pipeline/job.py` line with `def run(...)`.
-- Traceback at `src/pipeline/ingestion.py` with `from __future__ import annotations`.
-  - These usually indicate local file corruption/stale edits.
-  - Run:
-
-```powershell
-python scripts/doctor.py --fix
-# or manual restore:
-# git checkout -- src/pipeline/*.py
-# python scripts/doctor.py
-```
 
 ### Troubleshooting install errors
 

@@ -2,6 +2,7 @@ import pytest
 
 pyspark = pytest.importorskip("pyspark")
 SparkSession = pyspark.sql.SparkSession
+from pyspark.sql import SparkSession
 
 from pipeline.quality import run_quality_checks
 
@@ -11,6 +12,11 @@ def spark() -> SparkSession:
         return SparkSession.builder.master("local[1]").appName("quality-tests").getOrCreate()
     except Exception as exc:  # pragma: no cover - environment-specific Spark/JVM setup
         pytest.skip(f"SparkSession unavailable in this environment: {exc}")
+    return (
+        SparkSession.builder.master("local[1]")
+        .appName("quality-tests")
+        .getOrCreate()
+    )
 
 
 def test_quality_passes_for_valid_rows() -> None:
@@ -29,6 +35,8 @@ def test_quality_passes_for_valid_rows() -> None:
                 "order_ts": "2025-01-01 02:00:00",
                 "amount": 20.0,
             },
+            {"order_id": "1", "customer_id": "A", "order_ts": "2025-01-01 01:00:00", "amount": 10.0},
+            {"order_id": "2", "customer_id": "B", "order_ts": "2025-01-01 02:00:00", "amount": 20.0},
         ]
     )
 
