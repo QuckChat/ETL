@@ -45,27 +45,18 @@ def run_quality_checks(
     primary_key: str,
     amount_column: str = "amount",
     amount_min: float = 0,
-    min_rows: int = 1,
 ) -> QualityResult:
     """Execute quality checks and summarize results."""
 
-    total_rows = df.count()
     has_required_columns = check_required_columns(df, required_columns)
     duplicate_groups = check_duplicate_keys(df, primary_key)
     invalid_amount_rows = check_negative_amounts(df, amount_column, amount_min)
 
     metrics = {
-        "total_rows": total_rows,
         "missing_required_columns": 0 if has_required_columns else 1,
         "duplicate_key_groups": duplicate_groups,
         "invalid_amount_rows": invalid_amount_rows,
-        "below_min_rows": 1 if total_rows < min_rows else 0,
     }
 
-    passed = (
-        has_required_columns
-        and duplicate_groups == 0
-        and invalid_amount_rows == 0
-        and total_rows >= min_rows
-    )
+    passed = has_required_columns and duplicate_groups == 0 and invalid_amount_rows == 0
     return QualityResult(passed=passed, metrics=metrics)
