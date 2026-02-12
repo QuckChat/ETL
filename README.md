@@ -123,10 +123,52 @@ flowchart LR
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+# Optional (only if you need to run Airflow locally):
+# pip install -r requirements-airflow.txt
+bash scripts/run_local.sh  # uses --source sample for local demo
 bash scripts/run_local.sh
 ```
 
 > For CDP, package `src/` as a deployable artifact and submit via Airflow, Oozie, or Spark submit wrappers.
+
+### Local validation
+
+```bash
+PYTHONPATH=src pytest -q tests/test_quality_rules.py
+```
+
+
+### Windows notes
+
+If you are on Windows PowerShell, use:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+$env:PYTHONPATH = "src"
+python -m pipeline.job --config conf/pipeline.yml --source sample
+```
+
+Airflow is optional. Use `requirements-airflow.txt`, which selects a compatible Airflow version based on your Python version (2.9.3 for `<3.13`, 3.1.7 for `>=3.13,<3.14`).
+
+```powershell
+pip install -r requirements-airflow.txt
+```
+
+
+### Troubleshooting install errors
+
+If you still see `No matching distribution found for apache-airflow==2.9.3`, you are likely using Python 3.13+ with an older cached requirements file.
+
+Use:
+
+```powershell
+pip install -r requirements.txt
+pip install -r requirements-airflow.txt
+```
+
+And verify the file contains both Python-version markers for Airflow.
 
 ---
 
